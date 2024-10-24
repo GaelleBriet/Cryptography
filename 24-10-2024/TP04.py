@@ -1,4 +1,5 @@
 #### 1 - Inverse modulaire par tâtonnement pour des petits nombres - ####
+from pydoc import plaintext, plain
 
 # 1.1 inverse de 2 modulo 15 (2 * x ≡ 1 [15])
 # 2 * 8 ≡ 1 [15]
@@ -28,5 +29,69 @@ def euclide_etendu(a, b):
         r0, u0, v0, r1, u1, v1 = r1, u1, v1, r0 - q * r1, u0 - q * u1, v0 - q * v1
     return u0, v0, r0
 
-# inverse de 79 modulo 23
-print(pow(79, -1, 23))
+# 2.2 utiliser la fonction pour trouver l'inverse de 79 modulo 23
+print(f"inverse 79 modulo 23 avec la fonction écrite", euclide_etendu(79, 23))
+
+# 2.3 vérifier que 79 × 79−1 ≡ 1 (mod 23)
+# utiliser l'algo euclide etendu pour trouver l'inverse de 79 modulo 23 appelé u
+u, v, r = euclide_etendu(79, 23)
+inverse = u
+# calculer 79 * u modulo 23
+resultat = (79 * inverse) % 23
+print(f"79 * {inverse} ≡ {resultat} (mod 23)")
+
+# 2.4 calculer l'inverse de 79 modulo 23 en utilisant pow
+print(f"inverse 79 modulo 23 avec pow",pow(79, -1, 23))
+
+
+#### 3 - Inversion modulaire pour inverser la fonction RSA - ####
+
+ciphertext = b'\xb1\xa2\x0f\x18\xb0\xd7\x81-H\x19\x1bW\xbcf$\xa8\x98\x8b\xdf\xbe\xf1\x0f\xcf\x97\xe1>\x99?\x19G\x8aie\x980^\x99F\x1aD\xed\x12{\x19\xe7\t\xba\x86'
+# chiffré avec un AES en mode GCM avec le nonce :
+nonce = b'\x1b\xda3\xac\x87\xcdM\xd7\x18\x12\x8djbT\xee\x02'
+# clé chiffrée par RSA :
+c = 64058176184997834950693853025106406054
+# clé publique donnée par :
+N = 236162332383177856298590687609142183389
+e = 65537
+
+# 3.1 Factoriser N pour calculer φ(N ) = (p − 1)(q − 1)
+# on peut utiliser un outil tel que Dcode
+# https://www.dcode.fr/decomposition-nombres-premiers
+# https://www.wolframalpha.com/ factorize 236162332383177856298590687609142183389
+p = 12864203442245594737
+q = 18358099935486794797
+phi_N = (p-1) * (q-1)
+# N = p * q
+print(f"Factoriser N pour calculer φ(N ) = (p − 1)(q − 1)= ", phi_N)
+
+# 3.2 Vérifier que e et φ(N ) sont bien premiers entre eux et retrouver la clé secrète d
+# inverse de e modulo φ(N )
+# e * x ≡ 1 [phi_N]
+d = pow(e, -1, phi_N)
+print(f"inverse de e modulo φ(N )", d)
+
+# Vérification que d est correct
+verification = (e * d) % phi_N
+print(f"Vérification : e * d mod φ(N) = {verification}")
+
+# 3.3 avec la clé secrète d, déchiffrer la clé du chiffrement AES c
+from Crypto.Cipher import AES
+from base64 import b64decode
+from Crypto.Util.Padding import unpad
+
+def rsa_decrypt(c, d, N):
+    return pow(c, d, N)
+decrypted_key = rsa_decrypt(c, d, N)
+print(f"Clé AES décryptée :", decrypted_key)
+
+# 3.4 Déchiffrer le message avec la clé secrète
+# convertir la clé déchiffrée en bytes (16  bytes pour AES)
+key_bytes = decrypted_key.to_bytes(16, byteorder='big')
+def aes_gcm_decrypt(ciphertext, key, nonce):
+    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+    plaintext = cipher.decrypt(ciphertext)
+    return plaintext
+
+decrypted_message = aes_gcm_decrypt(ciphertext, key_bytes , nonce)
+print(f"Message déchiffré :", decrypted_message.decode('utf-8'))
