@@ -95,3 +95,23 @@ def aes_gcm_decrypt(ciphertext, key, nonce):
 
 decrypted_message = aes_gcm_decrypt(ciphertext, key_bytes , nonce)
 print(f"Message déchiffré :", decrypted_message.decode('utf-8'))
+
+
+#### 4 - Bonus: RSA sur hackropole - ####
+# 4.1 - Résoudre le challenge SMIC(2)
+# La sécurité du cryptosystème RSA repose sur un problème calculatoire bien connu.
+# On vous demande de déchiffrer le “message” chiffré c ci-dessous pour retrouver le “message” en clair m associé à partir de la clé publique (n, e).
+e = 65537
+n = 632459103267572196107100983820469021721602147490918660274601
+c = 63775417045544543594281416329767355155835033510382720735973
+# c = m^e mod n
+# m = c^d mod n
+# d = e^-1 mod phi(n)
+# phi(n) = (p-1)(q-1)
+# n = p*q
+# factoriser n pour trouver p et q
+# Factoriser N pour calculer φ(N ) = (p − 1)(q − 1)
+# 650655447295098801102272374367 × 972033825117160941379425504503
+
+
+# 4.2 - Résoudre le challenge "Rien à signaler"
